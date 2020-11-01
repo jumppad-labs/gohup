@@ -1,6 +1,6 @@
 # GoHUP
 
-[![PkgGoDev](https://pkg.go.dev/badge/shipyard-run/gohup)](https://pkg.go.dev/shipyard-run/gohup)
+[![PkgGoDev](https://pkg.go.dev/badge/github.com/shipyard-run/gohup)](https://pkg.go.dev/github.com/shipyard-run/gohup)
 
 GoHup allows you to run a long running command in a detached background process.
 It does not a daemon runner which monitors the status of the process restarting when necessary,
