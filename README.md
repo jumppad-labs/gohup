@@ -4,7 +4,7 @@
 ![Go](https://github.com/shipyard-run/gohup/workflows/Go/badge.svg)
 
 GoHup allows you to run a long running command in a detached background process.
-It does not a daemon runner which monitors the status of the process restarting when necessary,
+It is not a daemon runner which monitors the status of the process restarting when necessary,
 GoHup only starts the process and returns the process id.
 
 GoHup is similar to the Unix command `nohup`, except GoHup automatically creates a PID file and
