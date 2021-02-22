@@ -1,4 +1,4 @@
-module github.com/nicholasjackson/gohup
+module github.com/shipyard-run/gohup
 
 go 1.14
 
