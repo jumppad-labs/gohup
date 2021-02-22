@@ -4,6 +4,7 @@ go 1.14
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/guillermo/go.procstat v0.0.0-20131123175440-34c2813d2e7f
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/mitchellh/go-ps v1.0.0
 	github.com/stretchr/testify v1.4.0

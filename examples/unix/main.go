@@ -10,10 +10,9 @@ import (
 func main() {
 	lp := &gohup.LocalProcess{}
 	o := gohup.Options{
-		Path: "/usr/bin/tail",
+		Path: "sleep",
 		Args: []string{
-			"-f",
-			"/dev/null",
+			"5",
 		},
 	}
 

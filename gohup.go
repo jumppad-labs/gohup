@@ -6,9 +6,11 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"syscall"
 
+	stats "github.com/guillermo/go.procstat"
 	ps "github.com/mitchellh/go-ps"
 )
 
@@ -152,6 +154,19 @@ func (l *LocalProcess) QueryStatus(pidfile string) (Status, error) {
 
 	if p == nil {
 		return StatusStopped, nil
+	}
+
+	if runtime.GOOS != "windows" {
+		// check the process is Zombie on Linux
+		stats := stats.Stat{Pid: pid}
+		err := stats.Update()
+		if err != nil {
+			return StatusError, err
+		}
+
+		if stats.State == 90 {
+			return StatusStopped, nil
+		}
 	}
 
 	return StatusRunning, nil
