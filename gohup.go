@@ -156,7 +156,7 @@ func (l *LocalProcess) QueryStatus(pidfile string) (Status, error) {
 		return StatusStopped, nil
 	}
 
-	if runtime.GOOS != "windows" {
+	if runtime.GOOS == "linux" {
 		// check the process is Zombie on Linux
 		stats := stats.Stat{Pid: pid}
 		err := stats.Update()
