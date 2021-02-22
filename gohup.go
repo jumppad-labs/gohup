@@ -2,12 +2,14 @@ package gohup
 
 import (
 	"fmt"
-	ps "github.com/mitchellh/go-ps"
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strconv"
 	"syscall"
+
+	ps "github.com/mitchellh/go-ps"
 )
 
 // Status of the process
@@ -97,7 +99,7 @@ func (l *LocalProcess) Start(options Options) (int, string, error) {
 	// If no pidfile is specified create a pid file in the
 	// temporary directory
 	if options.Pidfile == "" {
-		options.Pidfile = fmt.Sprintf("%s/%d.pid", os.TempDir(), pid)
+		options.Pidfile = filepath.Join(os.TempDir(), fmt.Sprintf("%d.%s", pid, "pid"))
 	}
 
 	// write the pid file
