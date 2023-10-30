@@ -1,6 +1,9 @@
 $lastRunTime = [DateTime]::MinValue 
 
-for ($i=1; $i -le 10; $i++)
+# Start a child script
+& "$PSScriptRoot\child-script.ps1"
+
+for ($i=1; $i -le 60; $i++)
 {
     $lastRunTime = Get-Date
 
