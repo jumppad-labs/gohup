@@ -1,5 +1,4 @@
-//go:build linux
-
+//go:build darwin
 package gohup
 
 import (
