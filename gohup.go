@@ -79,6 +79,7 @@ func (l *LocalProcess) Start(options Options) (int, string, error) {
 	cmd := exec.Command(options.Path, options.Args...)
 	cmd.Dir = options.Dir
 	cmd.Env = options.Env
+	cmd.SysProcAttr = &syscall.SysProcAttr{Setsid: true}
 
 	// create a logfile and redirect std error and std out
 	if options.Logfile != "" {
@@ -125,7 +126,8 @@ func (l *LocalProcess) Stop(pidfile string) error {
 		return err
 	}
 
-	p.Kill()
+	// kill all the processes in the process group
+	syscall.Kill(-p.Pid, syscall.SIGKILL)
 
 	err = os.Remove(pidfile)
 	if err != nil {

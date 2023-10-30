@@ -10,11 +10,7 @@ import (
 func main() {
 	lp := &gohup.LocalProcess{}
 	o := gohup.Options{
-		Path: "powershell.exe",
-		Args: []string{
-			".\\test-script.ps1",
-			"50000",
-		},
+		Path: "./script.sh",
 	}
 
 	pid, pidfile, err := lp.Start(o)

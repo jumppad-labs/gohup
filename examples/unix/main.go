@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/shipyard-run/gohup"
+	"github.com/jumppad-labs/gohup"
 )
 
 func main() {
