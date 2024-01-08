@@ -64,6 +64,13 @@ func Test_StartsAProcessInBackground(t *testing.T) {
 	require.Greater(t, pid, 1)
 }
 
+func Test_QueryStatusReturnsNotFoundWhenPidNotExist(t *testing.T) {
+	status, err := (&LocalProcess{}).QueryStatus("/tmp/doesnotexist.pid")
+
+	require.NoError(t, err)
+	require.Equal(t, status, StatusNotFound)
+}
+
 func Test_StartsAProcessInBackgroundAndLogOutput(t *testing.T) {
 	dir, _ := ioutil.TempDir("", "")
 

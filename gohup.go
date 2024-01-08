@@ -26,6 +26,9 @@ const StatusStopped Status = "StatusStopped"
 // StatusError is returned when it is not possible to determine the status of a process
 const StatusError Status = "StatusError"
 
+// StatusNotFound is returned when the pid does not exist
+const StatusNotFound Status = "StatusNotFound"
+
 // Options to be used when starting a process
 type Options struct {
 	// Path of the process to start
@@ -146,7 +149,7 @@ func (l *LocalProcess) Stop(pidfile string) error {
 func (l *LocalProcess) QueryStatus(pidfile string) (Status, error) {
 	pid, err := l.readPidFile(pidfile)
 	if err != nil {
-		return StatusError, err
+		return StatusNotFound, nil
 	}
 
 	p, err := ps.FindProcess(pid)
