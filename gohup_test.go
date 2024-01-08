@@ -72,7 +72,7 @@ func Test_QueryStatusReturnsNotFoundWhenPidNotExist(t *testing.T) {
 }
 
 func Test_StartsAProcessInBackgroundAndLogOutput(t *testing.T) {
-	dir, _ := ioutil.TempDir("", "")
+	dir := t.TempDir()
 
 	o := Options{
 		Path:    "echo",
@@ -81,19 +81,27 @@ func Test_StartsAProcessInBackgroundAndLogOutput(t *testing.T) {
 	}
 
 	lp := &LocalProcess{}
-	pid, _, err := lp.Start(o)
-	time.Sleep(10 * time.Millisecond)
+	pid, pidfile, err := lp.Start(o)
+	fmt.Println(pidfile)
+	//t.FailNow()
+
+	require.Eventuallyf(t, func() bool {
+		s, err := lp.QueryStatus(pidfile)
+		fmt.Println(s, err)
+		return s == StatusStopped
+	}, 30*time.Second, 1*time.Second, "process failed to stop")
 
 	require.NoError(t, err)
 	require.Greater(t, pid, 1)
 
-	d, err := ioutil.ReadFile(o.Logfile)
+	d, err := os.ReadFile(o.Logfile)
 	require.NoError(t, err)
 	require.Equal(t, "Hello World\n", string(d))
 }
 
 func Test_StartsAProcessAndCreatesPIDFileWithDefaults(t *testing.T) {
 	pid, pidfile, err := start(t, nil)
+	require.NoError(t, err)
 
 	d, err := ioutil.ReadFile(pidfile)
 	require.NoError(t, err)
@@ -106,6 +114,7 @@ func Test_StartsAProcessAndCreatesPIDFileWithCustom(t *testing.T) {
 	options.Pidfile = pidfile
 
 	pid, _, err := start(t, &options)
+	require.NoError(t, err)
 
 	d, err := ioutil.ReadFile(pidfile)
 	require.NoError(t, err)

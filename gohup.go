@@ -157,6 +157,8 @@ func (l *LocalProcess) QueryStatus(pidfile string) (Status, error) {
 		return StatusError, err
 	}
 
+	fmt.Println(p,err)
+
 	if p == nil {
 		return StatusStopped, nil
 	}
