@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strconv"
+	"strings"
 	"syscall"
 
 	stats "github.com/guillermo/go.procstat"
@@ -157,8 +158,6 @@ func (l *LocalProcess) QueryStatus(pidfile string) (Status, error) {
 		return StatusError, err
 	}
 
-	fmt.Println(p,err)
-
 	if p == nil {
 		return StatusStopped, nil
 	}
@@ -166,12 +165,18 @@ func (l *LocalProcess) QueryStatus(pidfile string) (Status, error) {
 	if runtime.GOOS == "linux" {
 		// check the process is Zombie on Linux
 		stats := stats.Stat{Pid: pid}
-		err := stats.Update()
+		err = stats.Update()
 		if err != nil {
 			return StatusError, err
 		}
 
 		if stats.State == 90 {
+			return StatusStopped, nil
+		}
+	} else if runtime.GOOS == "darwin" {
+		// check the process is Zombie on Darwin
+		output, _ := exec.Command("ps", fmt.Sprintf("%d", p.Pid())).CombinedOutput()
+		if strings.Contains(string(output), "<defunct>") {
 			return StatusStopped, nil
 		}
 	}
