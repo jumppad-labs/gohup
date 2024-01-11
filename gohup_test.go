@@ -82,14 +82,12 @@ func Test_StartsAProcessInBackgroundAndLogOutput(t *testing.T) {
 
 	lp := &LocalProcess{}
 	pid, pidfile, err := lp.Start(o)
-	fmt.Println(pidfile)
-	//t.FailNow()
 
 	require.Eventuallyf(t, func() bool {
 		s, err := lp.QueryStatus(pidfile)
 		fmt.Println(s, err)
 		return s == StatusStopped
-	}, 30*time.Second, 1*time.Second, "process failed to stop")
+	}, 5*time.Second, 1*time.Second, "process failed to stop")
 
 	require.NoError(t, err)
 	require.Greater(t, pid, 1)
