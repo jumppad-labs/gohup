@@ -2,7 +2,6 @@ package gohup
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -40,8 +39,12 @@ type Options struct {
 	Env []string
 	// Directory to start the process in, default is the current directory
 	Dir string
-	// File to write the running process ID to, if blank a temporary file
-	// will be created.
+	// Directory to write pid files to. If empty, defaults to os.TempDir().
+	// Ignored when Pidfile is an absolute path.
+	PidDir string
+	// File to write the running process ID to. If an absolute path, used
+	// as-is. If a relative name, joined with PidDir. If empty, a file
+	// named <pid>.pid is created in PidDir.
 	Pidfile string
 	// File to write output from the started command to, if blank logs
 	// will be disgarded
@@ -103,10 +106,20 @@ func (l *LocalProcess) Start(options Options) (int, string, error) {
 	pid := cmd.Process.Pid
 	cmd.Process.Release()
 
-	// If no pidfile is specified create a pid file in the
-	// temporary directory
+	// Resolve the pid file path:
+	// - Pidfile absolute path: use as-is
+	// - Pidfile relative name: join with PidDir
+	// - Pidfile empty: generate <pid>.pid in PidDir
+	// - PidDir empty: defaults to os.TempDir()
+	pidDir := options.PidDir
+	if pidDir == "" {
+		pidDir = os.TempDir()
+	}
+
 	if options.Pidfile == "" {
-		options.Pidfile = filepath.Join(os.TempDir(), fmt.Sprintf("%d.%s", pid, "pid"))
+		options.Pidfile = filepath.Join(pidDir, fmt.Sprintf("%d.pid", pid))
+	} else if !filepath.IsAbs(options.Pidfile) {
+		options.Pidfile = filepath.Join(pidDir, options.Pidfile)
 	}
 
 	// write the pid file
@@ -198,7 +211,7 @@ func (l *LocalProcess) writePidFile(pid int, pidfile string) error {
 }
 
 func (l *LocalProcess) readPidFile(pidfile string) (int, error) {
-	d, err := ioutil.ReadFile(pidfile)
+	d, err := os.ReadFile(pidfile)
 	if err != nil {
 		return -1, fmt.Errorf("error reading file: %s", err)
 	}
