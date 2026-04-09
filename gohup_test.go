@@ -2,7 +2,6 @@ package gohup
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path"
 	"testing"
@@ -49,7 +48,7 @@ func start(t *testing.T, options *Options) (int, string, error) {
 }
 
 func tempPidfile(t *testing.T) string {
-	testFolder, _ := ioutil.TempDir("", "")
+	testFolder, _ := os.MkdirTemp("", "")
 	t.Cleanup(func() {
 		os.RemoveAll(testFolder)
 	})
@@ -101,7 +100,7 @@ func Test_StartsAProcessAndCreatesPIDFileWithDefaults(t *testing.T) {
 	pid, pidfile, err := start(t, nil)
 	require.NoError(t, err)
 
-	d, err := ioutil.ReadFile(pidfile)
+	d, err := os.ReadFile(pidfile)
 	require.NoError(t, err)
 	require.Equal(t, fmt.Sprintf("%d", pid), string(d))
 }
@@ -114,7 +113,60 @@ func Test_StartsAProcessAndCreatesPIDFileWithCustom(t *testing.T) {
 	pid, _, err := start(t, &options)
 	require.NoError(t, err)
 
-	d, err := ioutil.ReadFile(pidfile)
+	d, err := os.ReadFile(pidfile)
+	require.NoError(t, err)
+	require.Equal(t, fmt.Sprintf("%d", pid), string(d))
+}
+
+func Test_StartsAProcessAndCreatesPIDFileInPidDir(t *testing.T) {
+	pidDir := t.TempDir()
+	options := opts
+	options.PidDir = pidDir
+
+	pid, pidfile, err := start(t, &options)
+	require.NoError(t, err)
+
+	expected := path.Join(pidDir, fmt.Sprintf("%d.pid", pid))
+	require.Equal(t, expected, pidfile)
+
+	d, err := os.ReadFile(pidfile)
+	require.NoError(t, err)
+	require.Equal(t, fmt.Sprintf("%d", pid), string(d))
+}
+
+func Test_StartsAProcessWithPidDirAndRelativePidfile(t *testing.T) {
+	pidDir := t.TempDir()
+	options := opts
+	options.PidDir = pidDir
+	options.Pidfile = "myprocess.pid"
+
+	pid, pidfile, err := start(t, &options)
+	require.NoError(t, err)
+
+	expected := path.Join(pidDir, "myprocess.pid")
+	require.Equal(t, expected, pidfile)
+
+	d, err := os.ReadFile(pidfile)
+	require.NoError(t, err)
+	require.Equal(t, fmt.Sprintf("%d", pid), string(d))
+}
+
+func Test_StartsAProcessWithPidDirAndAbsolutePidfile(t *testing.T) {
+	pidDir := t.TempDir()
+	absDir := t.TempDir()
+	absPidfile := path.Join(absDir, "absolute.pid")
+
+	options := opts
+	options.PidDir = pidDir
+	options.Pidfile = absPidfile
+
+	pid, pidfile, err := start(t, &options)
+	require.NoError(t, err)
+
+	// absolute Pidfile should be used as-is, PidDir ignored
+	require.Equal(t, absPidfile, pidfile)
+
+	d, err := os.ReadFile(pidfile)
 	require.NoError(t, err)
 	require.Equal(t, fmt.Sprintf("%d", pid), string(d))
 }
@@ -157,7 +209,7 @@ func Test_StatusStoppedWhenStopped(t *testing.T) {
 	pidfile := tempPidfile(t)
 	options := opts
 	options.Pidfile = pidfile
-	ioutil.WriteFile(pidfile, []byte("99999"), os.ModePerm)
+	os.WriteFile(pidfile, []byte("99999"), os.ModePerm)
 
 	lp := &LocalProcess{}
 	st, err := lp.QueryStatus(options.Pidfile)
